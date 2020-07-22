@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """Utilities for the builds app."""
+from django.conf import settings
 
 from readthedocs.projects.constants import (
     BITBUCKET_REGEXS,
@@ -10,7 +11,7 @@ from readthedocs.projects.constants import (
 
 
 def get_github_username_repo(url):
-    if 'github' in url:
+    if settings.GITHUB_DOMAIN in url:
         for regex in GITHUB_REGEXS:
             match = regex.search(url)
             if match:

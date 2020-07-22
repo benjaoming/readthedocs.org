@@ -8,7 +8,6 @@ import socket
 from celery.schedules import crontab
 
 from readthedocs.core.settings import Settings
-from readthedocs.projects.constants import CELERY_LOW, CELERY_MEDIUM, CELERY_HIGH
 
 
 try:
@@ -330,6 +329,12 @@ class CommunityBaseSettings(Settings):
     CELERYD_PREFETCH_MULTIPLIER = 1
     CELERY_CREATE_MISSING_QUEUES = True
 
+    # Set 3 priorities, [low, medium, high] -- default is medium
+    # Leave some space on each side of the set to expand if needed
+    CELERY_LOW = 3
+    CELERY_MEDIUM = 5
+    CELERY_HIGH = 7
+
     BROKER_TRANSPORT_OPTIONS = {
         'queue_order_strategy': 'priority',
         # We use 0 here because some things still put a task in the queue with no priority
@@ -617,6 +622,12 @@ class CommunityBaseSettings(Settings):
     ADSERVER_API_BASE = None
     ADSERVER_API_KEY = None
     ADSERVER_API_TIMEOUT = 0.35  # seconds
+
+    # Base URL for API calls, can be replace by https://mygithub-enterprise.com/api/v3/
+    GITHUB_API_BASE = "https://api.github.com/"
+    # Github base domain. Replace with mygithub-enterprise.com.
+    # Used to detect and build URLs for Github's interface (but not API)
+    GITHUB_DOMAIN = "github.com"
 
     # Misc application settings
     GLOBAL_ANALYTICS_CODE = None

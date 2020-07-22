@@ -7,7 +7,9 @@ theme names and repository types.
 
 import re
 
+from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
+from urllib.parse import urljoin
 
 SPHINX = 'sphinx'
 MKDOCS = 'mkdocs'
@@ -311,11 +313,11 @@ PROJECT_PK_REGEX = r'(?:[-\w]+)'
 PROJECT_SLUG_REGEX = r'(?:[-\w]+)'
 
 GITHUB_REGEXS = [
-    re.compile(r'github.com/(.+)/(.+)(?:\.git){1}$'),
+    re.compile(re.escape(settings.GITHUB_DOMAIN) + r'/(.+)/(.+)(?:\.git){1}$'),
     # This must come before the one without a / to make sure we don't capture the /
-    re.compile(r'github.com/(.+)/(.+)/'),
-    re.compile(r'github.com/(.+)/(.+)'),
-    re.compile(r'github.com:(.+)/(.+)\.git$'),
+    re.compile(re.escape(settings.GITHUB_DOMAIN) + r'/(.+)/(.+)/'),
+    re.compile(re.escape(settings.GITHUB_DOMAIN) + r'/(.+)/(.+)'),
+    re.compile(re.escape(settings.GITHUB_DOMAIN) + r':(.+)/(.+)\.git$'),
 ]
 BITBUCKET_REGEXS = [
     re.compile(r'bitbucket.org/(.+)/(.+)\.git$'),
@@ -332,21 +334,21 @@ GITLAB_REGEXS = [
     re.compile(r'gitlab.com/(.+)/(.+)'),
     re.compile(r'gitlab.com:(.+)/(.+)\.git$'),
 ]
-GITHUB_URL = (
-    'https://github.com/{user}/{repo}/'
-    '{action}/{version}{docroot}{path}{source_suffix}'
+GITHUB_URL = urljoin(
+    'https://{domain}'.format(domain=settings.GITHUB_DOMAIN),
+    '{user}/{repo}/{action}/{version}{docroot}{path}{source_suffix}'
 )
-GITHUB_COMMIT_URL = (
-    'https://github.com/{user}/{repo}/'
-    'commit/{commit}'
+GITHUB_COMMIT_URL = urljoin(
+    'https://{domain}'.format(domain=settings.GITHUB_DOMAIN),
+    '{user}/{repo}/commit/{commit}'
 )
-GITHUB_PULL_REQUEST_URL = (
-    'https://github.com/{user}/{repo}/'
-    'pull/{number}'
+GITHUB_PULL_REQUEST_URL = urljoin(
+    'https://{domain}'.format(domain=settings.GITHUB_DOMAIN),
+    '{user}/{repo}/pull/{number}'
 )
-GITHUB_PULL_REQUEST_COMMIT_URL = (
-    'https://github.com/{user}/{repo}/'
-    'pull/{number}/commits/{commit}'
+GITHUB_PULL_REQUEST_COMMIT_URL = urljoin(
+    'https://{domain}'.format(domain=settings.GITHUB_DOMAIN),
+    '{user}/{repo}/pull/{number}/commits/{commit}'
 )
 BITBUCKET_URL = (
     'https://bitbucket.org/{user}/{repo}/'
@@ -381,8 +383,7 @@ GITLAB_MR_PULL_PATTERN = 'merge-requests/{id}/head:external-{id}'
 GITHUB_BRAND = 'GitHub'
 GITLAB_BRAND = 'GitLab'
 
-# Set 3 priorities, [low, medium, high] -- default is medium
-# Leave some space on each side of the set to expand if needed
-CELERY_LOW = 3
-CELERY_MEDIUM = 5
-CELERY_HIGH = 7
+# Now stored as a setting
+CELERY_LOW = settings.CELERY_LOW
+CELERY_MEDIUM = settings.CELERY_MEDIUM
+CELERY_HIGH = settings.CELERY_HIGH

@@ -11,6 +11,7 @@ from django.db.models import Q
 from django.conf import settings
 from django.urls import reverse
 from requests.exceptions import RequestException
+from urllib.parse import urljoin
 
 from readthedocs.api.v2.client import api
 from readthedocs.builds import utils as build_utils
@@ -32,8 +33,8 @@ class GitHubService(Service):
     """Provider service for GitHub."""
 
     adapter = GitHubOAuth2Adapter
-    # TODO replace this with a less naive check
-    url_pattern = re.compile(r'github\.com')
+
+    url_pattern = re.compile(re.escape(settings.GITHUB_API_BASE))
 
     def sync(self):
         """Sync repositories and organizations."""
@@ -49,7 +50,7 @@ class GitHubService(Service):
 
     def sync_repositories(self):
         """Sync repositories from GitHub API."""
-        repos = self.paginate('https://api.github.com/user/repos?per_page=100')
+        repos = self.paginate(urljoin(settings.GITHUB_API_BASE, 'user/repos?per_page=100'))
         try:
             for repo in repos:
                 self.create_repository(repo)
@@ -64,7 +65,7 @@ class GitHubService(Service):
     def sync_organizations(self):
         """Sync organizations from GitHub API."""
         try:
-            orgs = self.paginate('https://api.github.com/user/orgs')
+            orgs = self.paginate(urljoin(settings.GITHUB_API_BASE, 'user/orgs'))
             for org in orgs:
                 org_resp = self.get_session().get(org['url'])
                 org_obj = self.create_organization(org_resp.json())
@@ -232,7 +233,7 @@ class GitHubService(Service):
         try:
             resp = session.get(
                 (
-                    'https://api.github.com/repos/{owner}/{repo}/hooks'
+                    urljoin(settings.GITHUB_API_BASE, 'repos/{owner}/{repo}/hooks')
                     .format(owner=owner, repo=repo)
                 ),
             )
@@ -293,7 +294,7 @@ class GitHubService(Service):
         try:
             resp = session.post(
                 (
-                    'https://api.github.com/repos/{owner}/{repo}/hooks'
+                    urljoin(settings.GITHUB_API_BASE, 'repos/{owner}/{repo}/hooks')
                     .format(owner=owner, repo=repo)
                 ),
                 data=data,
@@ -456,7 +457,7 @@ class GitHubService(Service):
         resp = None
 
         try:
-            statuses_url = f'https://api.github.com/repos/{owner}/{repo}/statuses/{commit}'
+            statuses_url = urljoin(settings.GITHUB_API_BASE, f'repos/{owner}/{repo}/statuses/{commit}')
             resp = session.post(
                 statuses_url,
                 data=json.dumps(data),

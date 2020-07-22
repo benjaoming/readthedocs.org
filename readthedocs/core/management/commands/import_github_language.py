@@ -13,6 +13,10 @@ which should contain a proper GitHub Oauth Token for rate limiting.
 import os
 
 import requests
+
+from urllib.parse import urljoin
+
+from django.conf import settings
 from django.core.cache import cache
 from django.core.management.base import BaseCommand
 
@@ -53,7 +57,7 @@ class Command(BaseCommand):
             cache_key = '{}-{}'.format(user, repo)
             top_lang = cache.get(cache_key, None)
             if not top_lang:
-                url = 'https://api.github.com/repos/{user}/{repo}/languages'.format(
+                url = urljoin(settings.GITHUB_API_BASE, 'repos/{user}/{repo}/languages').format(
                     user=user,
                     repo=repo,
                 )
