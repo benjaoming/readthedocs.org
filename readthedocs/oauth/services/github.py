@@ -124,7 +124,7 @@ class GitHubService(Service):
             repo.ssh_url = fields['ssh_url']
             repo.html_url = fields['html_url']
             repo.private = fields['private']
-            if repo.private:
+            if repo.private or settings.GITHUB_ALWAYS_SSH:
                 repo.clone_url = fields['ssh_url']
             else:
                 repo.clone_url = fields['clone_url']

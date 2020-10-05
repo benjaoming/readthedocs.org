@@ -628,6 +628,8 @@ class CommunityBaseSettings(Settings):
     # Github base domain. Replace with mygithub-enterprise.com.
     # Used to detect and build URLs for Github's interface (but not API)
     GITHUB_DOMAIN = "github.com"
+    # Always prefer SSH over HTTPS method
+    GITHUB_ALWAYS_SSH = False
 
     # Misc application settings
     GLOBAL_ANALYTICS_CODE = None
