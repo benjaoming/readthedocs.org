@@ -157,6 +157,7 @@ class BaseSphinx(BaseBuilder):
             'subproject_urls': subproject_urls,
 
             # GitHub
+            'github_host': settings.GITHUB_DOMAIN,
             'github_user': github_user,
             'github_repo': github_repo,
             'github_version': remote_version,
