@@ -253,9 +253,13 @@ class GitHubService(Service):
                         break
             else:
                 log.info(
-                    'GitHub project does not exist or user does not have '
-                    'permissions: project=%s',
-                    project,
+                    (
+                        'GitHub project does not exist or user does not have '
+                        'permissions: project: {project}, status code: {status}'
+                    ).format(
+                        project=project,
+                        status=resp.status_code,
+                    )
                 )
 
         except Exception:
@@ -307,30 +311,42 @@ class GitHubService(Service):
                 integration.provider_data = recv_data
                 integration.save()
                 log.info(
-                    'GitHub webhook creation successful for project: %s',
-                    project,
+                    (
+                        'GitHub webhook creation successful for project:'
+                        '{project} - status code: {status}'
+                    ).format(
+                        project=project,
+                        status=resp.status_code
+                    ),
                 )
                 return (True, resp)
 
             if resp.status_code in [401, 403, 404]:
                 log.info(
-                    'GitHub project does not exist or user does not have '
-                    'permissions: project=%s',
-                    project,
+                    (
+                        'GitHub project does not exist or user does not have '
+                        'permissions: project: {project} - status code: '
+                        '{status}'
+                    ).format(
+                        project=project,
+                        status=resp.status_code
+                    ),
                 )
 
-            # All other status codes will flow to the `else` clause below
+            # All other status codes will flow to the `except` clause below
 
         # Catch exceptions with request or deserializing JSON
         except (RequestException, ValueError):
             log.exception(
-                'GitHub webhook creation failed for project: %s',
-                project,
+                (
+                    'GitHub webhook creation failed for project: {project}'
+                ).format(project=project),
             )
-        else:
-            log.error(
-                'GitHub webhook creation failed for project: %s',
-                project,
+        except Exception:
+            log.exception(
+                (
+                    'GitHub webhook creation failed for project: {project}'
+                ).format(project=project),
             )
             # Response data should always be JSON, still try to log if not
             # though
@@ -386,14 +402,23 @@ class GitHubService(Service):
                 integration.provider_data = recv_data
                 integration.save()
                 log.info(
-                    'GitHub webhook update successful for project: %s',
-                    project,
+                    (
+                        'GitHub webhook update successful for project:'
+                        '{project} - status code: {status}'
+                    ).format(
+                        project=project,
+                        status=resp.status_code
+                    ),
                 )
                 return (True, resp)
 
             # GitHub returns 404 when the webhook doesn't exist. In this case,
             # we call ``setup_webhook`` to re-configure it from scratch
             if resp.status_code == 404:
+                log.info(
+                    'Github webhook does not exist, going to create one for'
+                    'project: {project}'.format(project=project)
+                )
                 return self.setup_webhook(project, integration)
 
         # Catch exceptions with request or deserializing JSON
